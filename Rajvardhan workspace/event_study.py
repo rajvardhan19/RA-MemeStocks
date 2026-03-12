@@ -63,17 +63,23 @@ def estimate_capm(stock_data, symbol, estimation_end, window_days=None):
 
 # ── CAR calculation ───────────────────────────────────────────────────────────
 
-def calculate_car(stock_data, event, model_params, symbol):
+def calculate_car(stock_data, event, model_params, symbol, pre_period_hours=1):
     """
     Calculate Cumulative Abnormal Return for a single outage event.
+
+    Includes a pre-period of `pre_period_hours` before the event start so that
+    figures can show whether pre-trends exist. CAR is normalized to 0 at
+    event_start so that pre-period drift is visible but post-event metrics
+    are unaffected.
 
     Returns a dict with summary metrics and the full event_data DataFrame,
     or None if no data is available for the window.
     """
     event_start = event["start"]
     event_end_extended = event["end"] + timedelta(hours=2)
+    pre_period_start = event_start - timedelta(hours=pre_period_hours)
 
-    event_data = stock_data.loc[event_start:event_end_extended].copy()
+    event_data = stock_data.loc[pre_period_start:event_end_extended].copy()
     if event_data.empty:
         return None
 
@@ -85,7 +91,14 @@ def calculate_car(stock_data, event, model_params, symbol):
     # Expected and abnormal returns
     event_data["expected_return"] = alpha + beta * event_data["spy_return"]
     event_data["AR"] = event_data[return_col] - event_data["expected_return"]
-    event_data["CAR"] = event_data["AR"].cumsum()
+
+    # Compute cumulative AR from pre-period start, then normalize so CAR = 0
+    # at event_start — preserves all post-event metrics while revealing pre-trends.
+    event_data["CAR_raw"] = event_data["AR"].cumsum()
+    pre_mask = event_data.index <= event_start
+    car_offset = event_data.loc[pre_mask, "CAR_raw"].iloc[-1] if pre_mask.any() else 0.0
+    event_data["CAR"] = event_data["CAR_raw"] - car_offset
+
     event_data["time_from_start"] = (
         (event_data.index - event_start).total_seconds() / 60
     )
@@ -125,6 +138,7 @@ def calculate_car(stock_data, event, model_params, symbol):
         "event_name": event["name"],
         "start_time": event["start"],
         "end_time": event["end"],
+        "pre_period_start": pre_period_start,
         "duration_minutes": event["duration_minutes"],
         "pre_ban": event["pre_ban"],
         "CAR_30min": car_30min,

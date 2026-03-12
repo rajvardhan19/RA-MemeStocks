@@ -131,16 +131,6 @@ def plot_event_detail(result, symbol, event_num):
     ax2.set_xlabel("Time")
     ax2.grid(alpha=0.3)
 
-    # Annotation box
-    car_end = result["CAR_at_outage_end"]
-    pchg = result["price_change_pct"]
-    stars = _sig_stars(result["p_value"])
-    annotation = (f"CAR at outage end: {car_end:.4f} {stars}\n"
-                  f"Price change: {pchg:+.2f}%")
-    ax2.text(0.02, 0.95, annotation, transform=ax2.transAxes,
-             fontsize=10, verticalalignment="top",
-             bbox=dict(boxstyle="round,pad=0.4", facecolor="wheat", alpha=0.8))
-
     ax2.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
     plt.tight_layout()
 
