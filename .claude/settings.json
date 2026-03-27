@@ -6,7 +6,10 @@
       "Read(//Users/rajvardhan/miniforge3/**)",
       "Read(//Users/rajvardhan/mambaforge/**)",
       "Bash(jupyter-nbconvert --version)",
-      "Bash(jupyter-nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=300 meme_stock_outage_ff4.ipynb)"
+      "Bash(jupyter-nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=300 meme_stock_outage_ff4.ipynb)",
+      "Bash(python3 -c \":*)",
+      "Bash(jupyter-nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=300 excess_return_multi_model.ipynb)",
+      "Bash(jupyter-nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=300 meme_stock_outage_multi_freq.ipynb)"
     ]
   }
 }
