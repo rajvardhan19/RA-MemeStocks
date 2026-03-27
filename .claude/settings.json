@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(jupyter nbconvert:*)",
+      "Read(//Users/rajvardhan/anaconda3/**)",
+      "Read(//Users/rajvardhan/miniforge3/**)",
+      "Read(//Users/rajvardhan/mambaforge/**)",
+      "Bash(jupyter-nbconvert --version)",
+      "Bash(jupyter-nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=300 meme_stock_outage_ff4.ipynb)"
+    ]
+  }
+}

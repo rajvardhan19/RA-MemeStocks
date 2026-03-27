@@ -39,6 +39,7 @@ STOCKS = {
 # ── Event definitions ─────────────────────────────────────────────────────────
 ROBINHOOD_BAN_DATE = pd.Timestamp("2021-01-28 09:30:00")
 ESTIMATION_WINDOW_DAYS = 120
+ESTIMATION_LAG_DAYS = 2    # estimation_end = first_event_start - 2 days ([-120, -2] window)
 
 OUTAGE_EVENTS = [
     {

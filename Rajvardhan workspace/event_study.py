@@ -162,6 +162,152 @@ def significance_stars(p):
     return ""
 
 
+# ── Recovery CAR calculation ──────────────────────────────────────────────────
+
+def calculate_recovery_car(stock_data, event, model_params, symbol,
+                           recovery_window_hours=2):
+    """
+    Calculate CAR for the recovery period after an outage ends.
+    CAR is anchored to 0 at outage_end and accumulated forward.
+    Reports CARs at +30min, +1hr, and +2hr with Patell t-stats at each horizon.
+
+    Uses the same CAPM model parameters (alpha, beta, sigma) as the main analysis.
+    """
+    from scipy import stats as scipy_stats
+
+    recovery_start = event["end"]
+    recovery_end = recovery_start + timedelta(hours=recovery_window_hours)
+    event_data = stock_data.loc[recovery_start:recovery_end].copy()
+    if event_data.empty:
+        return None
+
+    return_col = config.STOCKS[symbol]["return_col"]
+    price_col  = config.STOCKS[symbol]["price_col"]
+    alpha = model_params["alpha"]
+    beta  = model_params["beta"]
+    sigma = model_params["residual_std"]
+
+    event_data["expected_return"] = alpha + beta * event_data["spy_return"]
+    event_data["AR"]  = event_data[return_col] - event_data["expected_return"]
+    event_data["CAR"] = event_data["AR"].cumsum()
+
+    def car_at(target):
+        mask = event_data.index <= target
+        return event_data.loc[mask, "CAR"].iloc[-1] if mask.any() else np.nan
+
+    def t_at(car_val, n):
+        if sigma > 0 and n > 0 and not np.isnan(car_val):
+            t = car_val / (sigma * np.sqrt(n))
+            p = 2 * (1 - scipy_stats.norm.cdf(abs(t)))
+            return t, p
+        return np.nan, np.nan
+
+    car_30m = car_at(recovery_start + timedelta(minutes=30))
+    car_1h  = car_at(recovery_start + timedelta(hours=1))
+    car_2h  = event_data["CAR"].iloc[-1] if len(event_data) else np.nan
+
+    n_30 = len(event_data.loc[recovery_start : recovery_start + timedelta(minutes=30)])
+    n_1h = len(event_data.loc[recovery_start : recovery_start + timedelta(hours=1)])
+    n_2h = len(event_data)
+
+    t30, p30 = t_at(car_30m, n_30)
+    t1h, p1h = t_at(car_1h,  n_1h)
+    t2h, p2h = t_at(car_2h,  n_2h)
+
+    if len(event_data) >= 2:
+        price_change_pct = ((event_data[price_col].iloc[-1] - event_data[price_col].iloc[0])
+                            / event_data[price_col].iloc[0] * 100)
+    else:
+        price_change_pct = np.nan
+
+    return {
+        "event_name": event["name"],
+        "recovery_start": recovery_start,
+        "recovery_end": recovery_end,
+        "duration_minutes": event["duration_minutes"],
+        "pre_ban": event["pre_ban"],
+        "CAR_30min_recovery": car_30m,
+        "CAR_1h_recovery":    car_1h,
+        "CAR_2h_recovery":    car_2h,
+        "t_stat_30":  t30, "p_value_30":  p30,
+        "t_stat_1h":  t1h, "p_value_1h":  p1h,
+        "t_stat_2h":  t2h, "p_value_2h":  p2h,
+        "price_change_recovery_pct": price_change_pct,
+        "event_data": event_data,
+    }
+
+
+def run_recovery_analysis(symbols=None):
+    """
+    Run CAPM recovery event study for the given stock symbols.
+    CARs are anchored at outage end (+30min, +1hr, +2hr).
+    Returns a dict mapping symbol -> list of recovery result dicts.
+    Also saves a summary CSV.
+    """
+    if symbols is None:
+        symbols = ["GME", "AMC"]
+
+    config.ensure_dirs()
+    all_results = {}
+
+    for symbol in symbols:
+        print(f"\n{'='*60}")
+        print(f"  {symbol} CAPM Recovery Analysis")
+        print(f"{'='*60}")
+
+        data = load_stock_data(symbol)
+        first_event_start = min(e["start"] for e in config.OUTAGE_EVENTS)
+        estimation_end = first_event_start - timedelta(days=config.ESTIMATION_LAG_DAYS)
+
+        params = estimate_capm(data, symbol, estimation_end)
+        print(f"CAPM: alpha={params['alpha']:.6f}, beta={params['beta']:.4f}, "
+              f"sigma={params['residual_std']:.6f}")
+
+        recovery_results = []
+        for event in config.OUTAGE_EVENTS:
+            result = calculate_recovery_car(data, event, params, symbol)
+            if result:
+                recovery_results.append(result)
+
+        all_results[symbol] = recovery_results
+
+        print(f"\n{'Event':<25} {'CAR@+30m':>10} {'CAR@+1h':>10} "
+              f"{'CAR@+2h':>10} {'t(@2h)':>8} {'Sig':>5}")
+        print("-" * 70)
+        for r in recovery_results:
+            stars = significance_stars(r["p_value_2h"])
+            print(f"{r['event_name']:<25} {r['CAR_30min_recovery']:>10.4f} "
+                  f"{r['CAR_1h_recovery']:>10.4f} {r['CAR_2h_recovery']:>10.4f} "
+                  f"{r['t_stat_2h']:>8.2f} {stars:>5}")
+
+    # Save CSV
+    rows = []
+    for symbol, results in all_results.items():
+        for r in results:
+            rows.append({
+                "stock": symbol,
+                "event_name": r["event_name"],
+                "recovery_start": r["recovery_start"],
+                "recovery_end": r["recovery_end"],
+                "duration_minutes": r["duration_minutes"],
+                "pre_ban": r["pre_ban"],
+                "CAR_30min_recovery": r["CAR_30min_recovery"],
+                "CAR_1h_recovery":    r["CAR_1h_recovery"],
+                "CAR_2h_recovery":    r["CAR_2h_recovery"],
+                "t_stat_30":  r["t_stat_30"], "p_value_30":  r["p_value_30"],
+                "t_stat_1h":  r["t_stat_1h"], "p_value_1h":  r["p_value_1h"],
+                "t_stat_2h":  r["t_stat_2h"], "p_value_2h":  r["p_value_2h"],
+                "price_change_recovery_pct": r["price_change_recovery_pct"],
+            })
+
+    summary_df = pd.DataFrame(rows)
+    out_path = config.OUTPUT_DIR / "car_results_capm_recovery.csv"
+    summary_df.to_csv(out_path, index=False)
+    print(f"\nRecovery results saved to {out_path}")
+
+    return all_results
+
+
 # ── Main analysis ─────────────────────────────────────────────────────────────
 
 def run_analysis(symbols=None):
@@ -184,9 +330,9 @@ def run_analysis(symbols=None):
         data = load_stock_data(symbol)
         print(f"Loaded {len(data):,} minute observations")
 
-        # Estimation window ends 1 day before first event
+        # Estimation window ends 2 days before first event ([-120, -2] window)
         first_event_start = min(e["start"] for e in config.OUTAGE_EVENTS)
-        estimation_end = first_event_start - timedelta(days=1)
+        estimation_end = first_event_start - timedelta(days=config.ESTIMATION_LAG_DAYS)
 
         params = estimate_capm(data, symbol, estimation_end)
         print(f"CAPM: alpha={params['alpha']:.6f}, beta={params['beta']:.4f}, "

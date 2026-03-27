@@ -185,7 +185,65 @@ def plot_excess_return_timeseries(symbol):
     print(f"  Saved: {out.name}")
 
 
-# ── 4. Pre-ban vs post-ban summary ───────────────────────────────────────────
+# ── 4. Realized volatility time series ───────────────────────────────────────
+
+def plot_realized_volatility(rolling_window_minutes=30):
+    """
+    Plot rolling realized volatility (std of minute returns) for GME and AMC
+    over the full Nov 2020 – Apr 2021 sample period.
+    Highlights Jan 27-28 outage cluster; marks individual outage starts and
+    the Robinhood ban date with vertical lines.
+    """
+    gme_data = event_study.load_stock_data("GME")
+    amc_data = event_study.load_stock_data("AMC")
+
+    gme_vol = gme_data[config.STOCKS["GME"]["return_col"]].rolling(
+        window=rolling_window_minutes, min_periods=rolling_window_minutes // 2
+    ).std()
+    amc_vol = amc_data[config.STOCKS["AMC"]["return_col"]].rolling(
+        window=rolling_window_minutes, min_periods=rolling_window_minutes // 2
+    ).std()
+
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(16, 8), sharex=True)
+    fig.suptitle(
+        f"Realized Volatility — GME & AMC  (Rolling {rolling_window_minutes}-min Std Dev)",
+        fontsize=13, fontweight="bold"
+    )
+
+    cluster_start = pd.Timestamp("2021-01-27 00:00")
+    cluster_end   = pd.Timestamp("2021-01-29 00:00")
+
+    for ax, symbol, vol_series in [(ax1, "GME", gme_vol), (ax2, "AMC", amc_vol)]:
+        ax.plot(vol_series.index, vol_series, color="steelblue",
+                linewidth=0.4, alpha=0.7)
+        ax.axvspan(cluster_start, cluster_end, alpha=0.12, color="red",
+                   label="Jan 27-28 Outage Cluster")
+
+        for evt in config.OUTAGE_EVENTS:
+            color = PRE_BAN_COLOR if evt["pre_ban"] else POST_BAN_COLOR
+            ax.axvline(evt["start"], color=color, linestyle="--",
+                       linewidth=0.8, alpha=0.6)
+
+        ax.axvline(config.ROBINHOOD_BAN_DATE, color="purple", linestyle="-",
+                   linewidth=1.0, alpha=0.7, label="Robinhood Ban")
+
+        ax.set_ylabel(f"{symbol}  σ (per minute)")
+        ax.grid(alpha=0.3)
+        ax.legend(fontsize=9, loc="upper left")
+
+    ax2.set_xlabel("Date")
+    ax2.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+    fig.autofmt_xdate()
+    plt.tight_layout()
+
+    config.ensure_dirs()
+    out = config.FIGURES_DIR / "realized_volatility.png"
+    fig.savefig(out)
+    plt.close(fig)
+    print(f"  Saved: {out.name}")
+
+
+# ── 5. Pre-ban vs post-ban summary ───────────────────────────────────────────
 
 def plot_pre_vs_post_ban_summary(all_results):
     """Grouped bar chart comparing GME and AMC CARs, pre-ban vs post-ban."""
@@ -242,6 +300,7 @@ def generate_all():
         plot_excess_return_timeseries(symbol)
 
     plot_pre_vs_post_ban_summary(all_results)
+    plot_realized_volatility()
     print(f"\nAll figures saved to: {config.FIGURES_DIR}")
 
 
