@@ -1,0 +1,22 @@
+\begin{table}[htbp]
+  \centering
+  \caption{CAPM Cumulative Abnormal Returns During Reddit Outage Events}
+  \label{tab:capm_car}
+  \begin{tabular}{llcccccccrrc}
+    \hline\hline
+    Stock & Event & Dur. & Pre-Ban & CAR @30m & CAR @1h & CAR @End & CAR @End+2h & Price Chg & t-stat & p-val & Sig \\
+    \hline
+    GME & Outage 1 (Pre-Ban) & 131 & Yes & -16.58\% & -19.89\% & -13.07\% & -8.15\% & -10.10\% & -1.283 & 0.1994 &  \\
+    GME & Outage 2 (Pre-Ban) & 58 & Yes & -8.99\% & -14.25\% & -15.28\% & -46.13\% & -13.66\% & -2.210 & 0.0271 & ** \\
+    GME & Outage 3 (Post-Ban) & 127 & No & -28.82\% & -16.43\% & -33.26\% & -55.17\% & -28.89\% & -3.605 & 0.0003 & *** \\
+    GME & Outage 4 (Post-Ban) & 110 & No & -3.06\% & -7.02\% & -7.02\% & -7.02\% & -8.71\% & -1.092 & 0.2748 &  \\
+    \hline
+    AMC & Outage 1 (Pre-Ban) & 131 & Yes & -18.38\% & -19.08\% & 0.36\% & 12.00\% & 0.04\% & 0.060 & 0.9518 &  \\
+    AMC & Outage 2 (Pre-Ban) & 58 & Yes & -18.79\% & -15.91\% & -14.88\% & -53.33\% & -12.17\% & -3.661 & 0.0003 & *** \\
+    AMC & Outage 3 (Post-Ban) & 127 & No & -19.78\% & -0.07\% & -62.95\% & -46.08\% & -46.86\% & -11.839 & 0.0000 & *** \\
+    AMC & Outage 4 (Post-Ban) & 110 & No & -0.51\% & -7.80\% & -7.80\% & -7.80\% & -8.58\% & -2.084 & 0.0371 & ** \\
+    \hline\hline
+  \end{tabular}
+  \\[4pt]
+  {\small *** $p<0.01$, ** $p<0.05$, * $p<0.10$. CAR = cumulative abnormal return relative to the estimation window (120 trading days ending 2 days before each event). t-statistics in parentheses.}
+\end{table}

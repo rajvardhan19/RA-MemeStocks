@@ -1,0 +1,22 @@
+\begin{table}[htbp]
+  \centering
+  \caption{Fama-French 4-Factor Cumulative Abnormal Returns During Reddit Outage Events (1-min bars)}
+  \label{tab:ff4_car}
+  \begin{tabular}{llccccccc}
+    \hline\hline
+    Stock & Event & Pre-Ban & CAR @30m & CAR @1h & CAR @End & CAR @End+2h & Price Chg & FF Mins/Total \\
+    \hline
+    GME & Outage 1 (Pre-Ban) & Yes & -14.80\% & -18.39\% & -12.01\% & -7.02\% & -10.10\% & 128/128 \\
+    GME & Outage 2 (Pre-Ban) & Yes & -8.80\% & -13.94\% & -14.98\% & -46.40\% & -13.66\% & 0/59 \\
+    GME & Outage 3 (Post-Ban) & No & -30.99\% & -18.36\% & -33.87\% & -54.94\% & -28.89\% & 57/105 \\
+    GME & Outage 4 (Post-Ban) & No & -5.94\% & -9.56\% & -9.56\% & -9.56\% & -8.71\% & 0/51 \\
+    \hline
+    AMC & Outage 1 (Pre-Ban) & Yes & -18.75\% & -19.26\% & 0.58\% & 12.87\% & 0.04\% & 126/126 \\
+    AMC & Outage 2 (Pre-Ban) & Yes & -20.79\% & -17.66\% & -16.64\% & -54.41\% & -12.17\% & 0/59 \\
+    AMC & Outage 3 (Post-Ban) & No & -20.40\% & -0.37\% & -62.60\% & -44.85\% & -46.86\% & 51/101 \\
+    AMC & Outage 4 (Post-Ban) & No & -1.53\% & -8.68\% & -8.68\% & -8.68\% & -8.58\% & 0/50 \\
+    \hline\hline
+  \end{tabular}
+  \\[4pt]
+  {\small *** $p<0.01$, ** $p<0.05$, * $p<0.10$. CAR = cumulative abnormal return relative to the estimation window (120 trading days ending 2 days before each event). t-statistics in parentheses.}
+\end{table}

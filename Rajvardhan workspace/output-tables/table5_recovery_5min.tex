@@ -1,0 +1,22 @@
+\begin{table}[htbp]
+  \centering
+  \caption{Post-Outage Recovery Cumulative Abnormal Returns – 5min bars}
+  \label{tab:recovery_5min}
+  \begin{tabular}{llccccccccc}
+    \hline\hline
+    Stock & Event & Rec. Start & CAR @+30m & t & CAR @+1h & t & CAR @+2h & t & Sig & FF Bars \\
+    \hline
+    GME & Outage 1 (Pre-Ban) & 2021-01-27 13:40:00 & -3.96\% & -1.274 & -6.96\% & -1.645 & 2.63\% & 0.448 &  & 25/25 \\
+    GME & Outage 2 (Pre-Ban) & 2021-01-27 17:01:00 & 2.66\% & 0.924 & -0.62\% & -0.152 & -16.85\% & -2.929 & *** & 0/24 \\
+    GME & Outage 3 (Post-Ban) & 2021-01-28 10:51:00 & -98.15\% & -34.131 & -46.04\% & -11.321 & -39.52\% & -6.871 & *** & 23/24 \\
+    GME & Outage 4 (Post-Ban) & 2021-01-28 21:00:00 & — & — & — & — & — & — &  & 0/25 \\
+    \hline
+    AMC & Outage 1 (Pre-Ban) & 2021-01-27 13:40:00 & 14.86\% & 5.854 & 13.87\% & 4.011 & 9.64\% & 2.009 & ** & 25/25 \\
+    AMC & Outage 2 (Pre-Ban) & 2021-01-27 17:01:00 & 0.29\% & 0.124 & 0.42\% & 0.125 & -21.44\% & -4.561 & *** & 0/24 \\
+    AMC & Outage 3 (Post-Ban) & 2021-01-28 10:51:00 & -61.34\% & -26.105 & -29.83\% & -8.976 & -10.81\% & -2.300 & ** & 24/24 \\
+    AMC & Outage 4 (Post-Ban) & 2021-01-28 21:00:00 & — & — & — & — & — & — &  & 0/25 \\
+    \hline\hline
+  \end{tabular}
+  \\[4pt]
+  {\small *** $p<0.01$, ** $p<0.05$, * $p<0.10$. CAR = cumulative abnormal return relative to the estimation window (120 trading days ending 2 days before each event). t-statistics in parentheses.}
+\end{table}
