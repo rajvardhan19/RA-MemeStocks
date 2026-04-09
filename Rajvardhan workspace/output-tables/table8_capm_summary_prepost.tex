@@ -2,17 +2,17 @@
   \centering
   \caption{CAPM Summary: Average CARs Pre-Ban vs Post-Ban}
   \label{tab:capm_summary}
-  \begin{tabular}{llccccc}
+  \begin{tabular}{llcccccc}
     \hline\hline
-    Stock & Period & Events & Avg CAR @1h & Avg CAR @End & Avg Price Chg \\
+    Stock & Period & Events & Avg CAR @1h & Avg CAR @End & Avg Price Chg & Avg t-stat \\
     \hline
-    GME & Pre-Ban & 2 & -17.07\% & -14.18\% & -11.88\% \\
-    GME & Post-Ban & 2 & -11.73\% & -20.14\% & -18.80\% \\
+    GME & Pre-Ban & 2 & -17.07\% & -14.18\% & -11.88\% & -1.747 \\
+    GME & Post-Ban & 2 & -11.73\% & -20.14\% & -18.80\% & -2.349 \\
     \hline
-    AMC & Pre-Ban & 2 & -17.50\% & -7.26\% & -6.06\% \\
-    AMC & Post-Ban & 2 & -3.93\% & -35.37\% & -27.72\% \\
+    AMC & Pre-Ban & 2 & -17.50\% & -7.26\% & -6.06\% & -1.800 \\
+    AMC & Post-Ban & 2 & -3.93\% & -35.37\% & -27.72\% & -6.962 \\
     \hline\hline
   \end{tabular}
   \\[4pt]
-  {\small *** $p<0.01$, ** $p<0.05$, * $p<0.10$. CAR = cumulative abnormal return relative to the estimation window (120 trading days ending 2 days before each event). t-statistics in parentheses.}
+  {\small *** $p<0.01$, ** $p<0.05$, * $p<0.10$. CAR = cumulative abnormal return relative to the estimation window (120 trading days ending 2 days before each event). t-statistics computed via Patell methodology: $t = \text{CAR} / (\hat{\sigma} \sqrt{N})$, where $\hat{\sigma}$ is the residual standard deviation from the estimation window and $N$ is the number of return observations in the event window. p-values are two-tailed under the standard normal distribution. The Robinhood trading-ban cut-off is January 28, 2021 at 09:30 ET. Pre-Ban = Outages 1 \& 2 (January 27); Post-Ban = Outages 3 \& 4 (January 28). Avg t-stat is the simple mean of individual event Patell t-statistics within each group.}
 \end{table}
